@@ -16,6 +16,7 @@ schema: |
   denial_reason_code    STRING                 COMMENT 'CAS group/reason/remark codes',
   denial_reason_desc    STRING                 COMMENT 'Human-readable denial reason',
   _ingest_ts            TIMESTAMP              COMMENT 'Pipeline ingest timestamp',
+  _source_ts            TIMESTAMP              COMMENT 'Source file modification time',
   _source_file          STRING                 COMMENT 'Source file path'
 cluster_by:
   - claim_id

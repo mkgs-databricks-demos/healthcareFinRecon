@@ -7,7 +7,7 @@ from typing import Callable
 from pyspark import pipelines as dp
 from pyspark.sql import SparkSession
 
-from factory import SDPTableFactory, load_yaml, normalize_cluster_by
+from base.factory import SDPTableFactory, load_yaml, normalize_cluster_by
 
 
 class GoldFactory(SDPTableFactory):

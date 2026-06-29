@@ -1,7 +1,7 @@
 """Healthcare Revenue Cycle Reconciliation — SDP Pipeline entry point.
 
 Metadata-driven pipeline using YAML-injected table definitions, schemas,
-and expectations. No DLT imports; no LIVE. prefix; no dp.read/dp.read_stream.
+and expectations. No DLT imports; no legacy prefix syntax; no dp.read/dp.read_stream.
 
 This file is loaded as the single library in the DABs pipeline YAML.
 All SDP tables and views are dynamically registered into this module's

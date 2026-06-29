@@ -18,6 +18,7 @@ schema: |
   diagnosis_code        STRING                 COMMENT 'Primary diagnosis code (ICD-10-CM)',
   place_of_service      STRING                 COMMENT 'Place of service code',
   _ingest_ts            TIMESTAMP              COMMENT 'Pipeline ingest timestamp',
+  _source_ts            TIMESTAMP              COMMENT 'Source file modification time',
   _source_file          STRING                 COMMENT 'Source file path'
 cluster_by:
   - claim_id

@@ -6,7 +6,7 @@ from pathlib import Path
 import pyspark.sql.functions as F
 from pyspark import pipelines as dp
 
-from factory import SDPTableFactory, load_yaml, normalize_cluster_by
+from base.factory import SDPTableFactory, load_yaml, normalize_cluster_by
 
 
 class BronzeFactory(SDPTableFactory):

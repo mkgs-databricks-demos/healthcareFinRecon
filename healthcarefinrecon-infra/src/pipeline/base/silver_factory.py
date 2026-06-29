@@ -8,7 +8,7 @@ import pyspark.sql.functions as F
 from pyspark import pipelines as dp
 from pyspark.sql import SparkSession
 
-from factory import SDPTableFactory, load_yaml, normalize_cluster_by
+from base.factory import SDPTableFactory, load_yaml, normalize_cluster_by, expectation_decorator
 
 
 class SilverFactory(SDPTableFactory):
@@ -49,11 +49,18 @@ class SilverFactory(SDPTableFactory):
         schema_name = self.schema
 
         # 1. Temporary view
+        exp_cfg = cfg.get('expectations')
+
         def _src_view():
             return transform_fn(spark, catalog, schema_name)
 
         _src_view.__name__ = src_view_name
         _src_view.__qualname__ = src_view_name
+
+        if exp_cfg:
+            mode = exp_cfg.get('mode', 'record')
+            rules = exp_cfg.get('rules', {})
+            _src_view = expectation_decorator(mode, rules)(_src_view)
 
         target_globals[src_view_name] = dp.temporary_view(name=src_view_name)(_src_view)
 
