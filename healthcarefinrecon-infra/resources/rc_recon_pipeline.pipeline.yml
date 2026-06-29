@@ -1,0 +1,34 @@
+resources:
+  pipelines:
+    rc_recon_pipeline:
+      name: healthcarefinrecon-rc-recon
+      catalog: ${resources.schemas.rc_recon.catalog_name}
+      schema: ${resources.schemas.rc_recon.name}
+      channel: PREVIEW
+      development: false
+      continuous: false
+      libraries:
+        - file:
+            path: ../src/pipeline/01_bronze_rc_claims.sql
+        - file:
+            path: ../src/pipeline/02_bronze_rc_eob.sql
+        - file:
+            path: ../src/pipeline/03_silver_rc_claim.sql
+        - file:
+            path: ../src/pipeline/04_silver_rc_eob.sql
+        - file:
+            path: ../src/pipeline/05_gold_rc_claim.sql
+        - file:
+            path: ../src/pipeline/06_gold_rc_eob.sql
+        - file:
+            path: ../src/pipeline/07_gold_rc_recon_exception.sql
+        - file:
+            path: ../src/pipeline/08_gold_rc_fiscal_calendar.sql
+      configuration:
+        pipelines.enableTrackHistory: "true"
+      clusters:
+        - label: default
+          node_type_id: ${var.node_type}
+          autoscale:
+            min_workers: 1
+            max_workers: 4

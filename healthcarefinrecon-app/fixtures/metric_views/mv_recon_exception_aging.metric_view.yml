@@ -1,0 +1,86 @@
+version: 1.1
+
+source: "{catalog}.{schema}.gold_rc_recon_exception"
+
+comment: "Aging of unreconciled claim exceptions requiring follow-up action"
+
+dimensions:
+  - name: ar_aging_bucket
+    expr: ar_aging_bucket
+    display_name: AR Aging Bucket
+    synonyms: [aging, days outstanding, bucket, aging category]
+
+  - name: payer_name
+    expr: payer_name
+    display_name: Payer Name
+    synonyms: [insurance, payer, insurer]
+
+  - name: provider_organization
+    expr: provider_organization
+    display_name: Provider Organization
+    synonyms: [provider, billing provider, organization]
+
+  - name: adjudication_status
+    expr: adjudication_status
+    display_name: Adjudication Status
+    synonyms: [status, claim status, payment status]
+
+  - name: fiscal_year
+    expr: fiscal_year
+    display_name: Fiscal Year
+    synonyms: [FY, year]
+
+  - name: fiscal_period
+    expr: fiscal_period
+    display_name: Fiscal Period
+    synonyms: [period, month, accounting period]
+
+measures:
+  - name: exception_count
+    expr: COUNT(DISTINCT claim_id)
+    display_name: Exception Count
+    synonyms: [exceptions, unreconciled claims, open items]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: total_outstanding
+    expr: SUM(variance_amount)
+    display_name: Total Outstanding ($)
+    synonyms: [amount outstanding, open balance, variance dollars]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: avg_days_outstanding
+    expr: ROUND(AVG(days_outstanding), 1)
+    display_name: Avg Days Outstanding
+    synonyms: [average days, average age, DNFB days]
+    format:
+      type: number
+      decimal_places:
+        type: max
+        places: 1
+
+  - name: max_days_outstanding
+    expr: MAX(days_outstanding)
+    display_name: Max Days Outstanding
+    synonyms: [oldest claim, maximum days]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+materialization:
+  schedule: EVERY 1 DAYS
+  mode: relaxed
+  materialized_views:
+    - name: daily_aging
+      type: aggregated
+      dimensions: [ar_aging_bucket, payer_name, fiscal_year]
+      measures: [exception_count, total_outstanding, avg_days_outstanding]

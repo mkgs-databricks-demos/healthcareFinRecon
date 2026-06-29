@@ -1,0 +1,8 @@
+resources:
+  sql_warehouses:
+    aibi_warehouse:
+      name: "RC Recon AI/BI Warehouse"
+      cluster_size: "Small"
+      auto_stop_mins: 10
+      enable_serverless_compute: true
+      warehouse_type: PRO

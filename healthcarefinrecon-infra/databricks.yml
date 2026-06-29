@@ -1,0 +1,26 @@
+bundle:
+  name: healthcarefinrecon-infra
+
+workspace:
+  host: https://fevm-hls-fde.azuredatabricks.net
+
+variables:
+  catalog:
+    description: Unity Catalog catalog name
+    default: hls_fde
+  schema:
+    description: Schema name for RC Recon
+    default: rc_recon
+  node_type:
+    description: Cluster node type
+    default: Standard_DS3_v2
+
+include:
+  - resources/*.yml
+
+targets:
+  hls_fde:
+    mode: production
+    variables:
+      catalog: hls_fde
+      schema: rc_recon

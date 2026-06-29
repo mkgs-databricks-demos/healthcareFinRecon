@@ -1,0 +1,130 @@
+version: 1.1
+
+source: "{catalog}.{schema}.gold_rc_claim"
+
+joins:
+  - name: eob
+    source: "{catalog}.{schema}.silver_rc_eob"
+    "on": "source.claim_id = eob.claim_id"
+
+comment: "Healthcare revenue cycle — claim payment variance by payer and provider"
+
+dimensions:
+  - name: provider_organization
+    expr: source.provider_organization
+    display_name: Provider Organization
+    synonyms: [provider, billing provider, organization]
+
+  - name: payer_name
+    expr: source.payer_name
+    display_name: Payer Name
+    synonyms: [insurance, payer, insurer]
+
+  - name: claim_type
+    expr: source.claim_type
+    display_name: Claim Type
+    synonyms: [type of claim, claim category]
+
+  - name: service_date
+    expr: source.service_date
+    display_name: Service Date
+    format:
+      type: date
+      date_format: locale_short_month
+    synonyms: [date of service, DOS]
+
+  - name: fiscal_year
+    expr: source.fiscal_year
+    display_name: Fiscal Year
+    synonyms: [FY, year]
+
+  - name: fiscal_period
+    expr: source.fiscal_period
+    display_name: Fiscal Period
+    synonyms: [period, month, accounting period]
+
+  - name: adjudication_status
+    expr: eob.adjudication_status
+    display_name: Adjudication Status
+    synonyms: [status, claim status, payment status]
+
+measures:
+  - name: claim_count
+    expr: COUNT(DISTINCT source.claim_id)
+    display_name: Claim Count
+    synonyms: [number of claims, claims]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+      abbreviation: compact
+
+  - name: total_billed
+    expr: SUM(source.billed_amount)
+    display_name: Total Billed
+    synonyms: [billed amount, charges, gross charges]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: total_paid
+    expr: SUM(eob.paid_amount)
+    display_name: Total Paid
+    synonyms: [paid amount, reimbursement, collections]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: total_denied
+    expr: SUM(eob.denied_amount)
+    display_name: Total Denied
+    synonyms: [denied amount, denials]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: total_variance
+    expr: SUM(source.billed_amount - COALESCE(eob.paid_amount, 0) - COALESCE(eob.denied_amount, 0))
+    display_name: Total Variance
+    synonyms: [variance, underpayment, difference, write-off]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: variance_rate
+    expr: ROUND(MEASURE(total_variance) / NULLIF(MEASURE(total_billed), 0) * 100, 2)
+    display_name: Variance Rate (%)
+    synonyms: [variance percentage, underpayment rate, write-off rate]
+    format:
+      type: number
+      decimal_places:
+        type: max
+        places: 2
+
+  - name: unreconciled_count
+    expr: COUNT(DISTINCT CASE WHEN eob.adjudication_status IN ('pending', 'partial') THEN source.claim_id END)
+    display_name: Unreconciled Claims
+    synonyms: [open claims, pending claims, unreconciled]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+materialization:
+  schedule: EVERY 1 DAYS
+  mode: relaxed
+  materialized_views:
+    - name: daily_variance
+      type: aggregated
+      dimensions: [service_date, fiscal_year, fiscal_period, payer_name, claim_type]
+      measures: [claim_count, total_billed, total_paid, total_variance, variance_rate]

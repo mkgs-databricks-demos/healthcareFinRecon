@@ -1,0 +1,23 @@
+bundle:
+  name: healthcarefinrecon-app
+
+workspace:
+  host: https://fevm-hls-fde.azuredatabricks.net
+
+variables:
+  infra_bundle_target:
+    description: DABs target name used to deploy the infra bundle (used to cross-reference deployed resources)
+    default: hls_fde
+  run_as_user:
+    description: Service principal or user to run jobs as
+    default: matthew.giglia@databricks.com
+
+include:
+  - resources/*.yml
+
+targets:
+  hls_fde:
+    mode: production
+    variables:
+      infra_bundle_target: hls_fde
+      run_as_user: matthew.giglia@databricks.com

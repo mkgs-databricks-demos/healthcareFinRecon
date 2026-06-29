@@ -1,0 +1,7 @@
+resources:
+  dashboards:
+    rc_recon_dashboard:
+      display_name: "Revenue Cycle Reconciliation"
+      file_path: ../fixtures/dashboards/rc_recon.lvdash.json
+      embed_credentials: false
+      warehouse_id: ${resources.sql_warehouses.aibi_warehouse.id}

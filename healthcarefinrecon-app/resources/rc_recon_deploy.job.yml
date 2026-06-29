@@ -1,0 +1,21 @@
+resources:
+  jobs:
+    rc_recon_deploy:
+      name: "RC Recon — Deploy Metric Views & Refresh Dashboard"
+      run_as:
+        user_name: ${var.run_as_user}
+      tasks:
+        - task_key: deploy_metric_views
+          notebook_task:
+            notebook_path: ../src/deploy_metric_views.ipynb
+            source: WORKSPACE
+            base_parameters:
+              catalog_use: hls_fde
+              schema_use: rc_recon
+
+        - task_key: refresh_dashboard
+          depends_on:
+            - task_key: deploy_metric_views
+          dashboard_task:
+            dashboard_id: ${resources.dashboards.rc_recon_dashboard.id}
+            warehouse_id: ${resources.sql_warehouses.aibi_warehouse.id}
