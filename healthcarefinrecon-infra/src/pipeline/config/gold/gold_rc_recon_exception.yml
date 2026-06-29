@@ -1,0 +1,8 @@
+name: gold_rc_recon_exception
+type: materialized_view
+comment: "Claims with unresolved payment variance requiring reconciliation action; includes AR aging buckets"
+transform: transform_gold_rc_recon_exception
+cluster_by_auto: true
+table_properties:
+  quality: gold
+  delta.autoOptimize.optimizeWrite: "true"

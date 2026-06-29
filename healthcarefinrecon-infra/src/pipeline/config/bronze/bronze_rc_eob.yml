@@ -1,0 +1,11 @@
+name: bronze_rc_eob
+comment: "Raw inbound Explanation of Benefits / ERA 835 remittance advice records"
+source:
+  landing_path: "/Volumes/{catalog}/{schema}/bronze_landing/eob/"
+  format: json
+  infer_column_types: true
+  include_existing_files: true
+table_properties:
+  quality: bronze
+  pipelines.channel: PREVIEW
+  delta.enableChangeDataFeed: "true"

@@ -1,0 +1,33 @@
+name: silver_rc_eob
+comment: "Cleansed and typed EOB / ERA 835 remittance records; duplicates removed via CDC SCD Type 1"
+keys:
+  - claim_id
+  - eob_id
+sequence_by: _source_ts
+schema: |
+  eob_id                STRING        NOT NULL COMMENT 'EOB / remittance advice identifier',
+  claim_id              STRING        NOT NULL COMMENT 'Reference to original claim identifier',
+  payer_id              STRING                 COMMENT 'Payer identifier',
+  payment_date          DATE                   COMMENT 'Date of payment',
+  paid_amount           DECIMAL(18,2)          COMMENT 'Amount paid by payer (USD)',
+  denied_amount         DECIMAL(18,2)          COMMENT 'Amount denied (USD)',
+  adjusted_amount       DECIMAL(18,2)          COMMENT 'Contractual adjustment amount (USD)',
+  adjudication_status   STRING                 COMMENT 'Status: paid | denied | partial | pending',
+  denial_reason_code    STRING                 COMMENT 'CAS group/reason/remark codes',
+  denial_reason_desc    STRING                 COMMENT 'Human-readable denial reason',
+  _ingest_ts            TIMESTAMP              COMMENT 'Pipeline ingest timestamp',
+  _source_ts            TIMESTAMP              COMMENT 'Source file modification time',
+  _source_file          STRING                 COMMENT 'Source file path'
+cluster_by:
+  - claim_id
+  - payment_date
+table_properties:
+  quality: silver
+  delta.enableChangeDataFeed: "true"
+  delta.enableDeletionVectors: "true"
+  delta.enableRowTracking: "true"
+expectations:
+  mode: drop
+  rules:
+    eob_id_not_null:   "eob_id IS NOT NULL"
+    claim_id_not_null: "claim_id IS NOT NULL"

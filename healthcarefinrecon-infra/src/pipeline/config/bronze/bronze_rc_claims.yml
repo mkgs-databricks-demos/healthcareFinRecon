@@ -1,0 +1,11 @@
+name: bronze_rc_claims
+comment: "Raw inbound claim records from clearinghouse / source EHR system (CMS-1500 / UB-04 equivalent)"
+source:
+  landing_path: "/Volumes/{catalog}/{schema}/bronze_landing/claims/"
+  format: json
+  infer_column_types: true
+  include_existing_files: true
+table_properties:
+  quality: bronze
+  pipelines.channel: PREVIEW
+  delta.enableChangeDataFeed: "true"

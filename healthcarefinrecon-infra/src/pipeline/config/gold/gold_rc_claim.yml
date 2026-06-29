@@ -1,0 +1,8 @@
+name: gold_rc_claim
+type: materialized_view
+comment: "Enriched claims with healthcare fiscal period tagging (FY starts July 1)"
+transform: transform_gold_rc_claim
+cluster_by_auto: true
+table_properties:
+  quality: gold
+  delta.autoOptimize.optimizeWrite: "true"

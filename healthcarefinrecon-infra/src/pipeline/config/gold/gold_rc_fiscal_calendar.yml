@@ -1,0 +1,7 @@
+name: gold_rc_fiscal_calendar
+type: materialized_view
+comment: "Healthcare fiscal calendar dimension: FY starts July 1. P1=July through P12=June. Span 2020-07-01 to 2030-06-30."
+transform: transform_gold_rc_fiscal_calendar
+table_properties:
+  quality: gold
+  delta.autoOptimize.optimizeWrite: "true"
