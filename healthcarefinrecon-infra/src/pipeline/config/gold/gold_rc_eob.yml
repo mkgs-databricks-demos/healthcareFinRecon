@@ -1,0 +1,8 @@
+name: gold_rc_eob
+type: materialized_view
+comment: "EOB records enriched with claim context and payment variance calculation"
+transform: transform_gold_rc_eob
+cluster_by_auto: true
+table_properties:
+  quality: gold
+  delta.autoOptimize.optimizeWrite: "true"

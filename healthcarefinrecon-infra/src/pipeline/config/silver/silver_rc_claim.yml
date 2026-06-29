@@ -1,0 +1,35 @@
+name: silver_rc_claim
+comment: "Cleansed and typed claim records; duplicates removed via CDC SCD Type 1"
+keys:
+  - claim_id
+sequence_by: _source_ts
+schema: |
+  claim_id              STRING        NOT NULL COMMENT 'Claim identifier (CMS-1500 CLM01)',
+  patient_id            STRING                 COMMENT 'Patient identifier',
+  provider_npi          STRING                 COMMENT 'Billing provider NPI (10-digit)',
+  provider_organization STRING                 COMMENT 'Provider organization name',
+  payer_id              STRING                 COMMENT 'Payer identifier',
+  payer_name            STRING                 COMMENT 'Payer name',
+  claim_type            STRING                 COMMENT 'Claim type: professional | institutional',
+  service_date          DATE                   COMMENT 'Primary date of service',
+  submission_date       DATE                   COMMENT 'Claim submission date',
+  billed_amount         DECIMAL(18,2)          COMMENT 'Total billed amount (USD)',
+  procedure_code        STRING                 COMMENT 'Primary procedure code (CPT/HCPCS)',
+  diagnosis_code        STRING                 COMMENT 'Primary diagnosis code (ICD-10-CM)',
+  place_of_service      STRING                 COMMENT 'Place of service code',
+  _ingest_ts            TIMESTAMP              COMMENT 'Pipeline ingest timestamp',
+  _source_file          STRING                 COMMENT 'Source file path'
+cluster_by:
+  - claim_id
+  - service_date
+table_properties:
+  quality: silver
+  delta.enableChangeDataFeed: "true"
+  delta.enableDeletionVectors: "true"
+  delta.enableRowTracking: "true"
+expectations:
+  mode: drop
+  rules:
+    claim_id_not_null: "claim_id IS NOT NULL"
+    service_date_not_null: "service_date IS NOT NULL"
+    billed_amount_positive: "billed_amount > 0"
