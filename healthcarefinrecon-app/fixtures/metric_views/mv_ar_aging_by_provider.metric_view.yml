@@ -1,0 +1,96 @@
+version: 1.1
+
+source: "{catalog}.{schema}.gold_rc_recon_exception"
+
+comment: "Accounts receivable aging by provider — tracks collection performance"
+
+dimensions:
+  - name: provider_organization
+    expr: provider_organization
+    display_name: Provider Organization
+    synonyms: [provider, billing provider, organization]
+
+  - name: provider_npi
+    expr: provider_npi
+    display_name: Provider NPI
+    synonyms: [NPI, national provider identifier]
+
+  - name: ar_aging_bucket
+    expr: ar_aging_bucket
+    display_name: AR Aging Bucket
+    synonyms: [aging, days outstanding, bucket, aging category]
+
+  - name: payer_name
+    expr: payer_name
+    display_name: Payer Name
+    synonyms: [insurance, payer, insurer]
+
+  - name: claim_type
+    expr: claim_type
+    display_name: Claim Type
+    synonyms: [type of claim, claim category]
+
+  - name: fiscal_year
+    expr: fiscal_year
+    display_name: Fiscal Year
+    synonyms: [FY, year]
+
+measures:
+  - name: open_claim_count
+    expr: COUNT(DISTINCT claim_id)
+    display_name: Open Claims
+    synonyms: [claims, open items, AR items]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: gross_ar
+    expr: SUM(billed_amount)
+    display_name: Gross A/R ($)
+    synonyms: [gross AR, total billed, charges outstanding]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: net_ar
+    expr: SUM(variance_amount)
+    display_name: Net A/R ($)
+    synonyms: [net AR, outstanding balance, collectible AR]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: collection_rate
+    expr: ROUND((MEASURE(gross_ar) - MEASURE(net_ar)) / NULLIF(MEASURE(gross_ar), 0) * 100, 2)
+    display_name: Collection Rate (%)
+    synonyms: [collection percentage, recovery rate, percent collected]
+    format:
+      type: number
+      decimal_places:
+        type: max
+        places: 2
+
+  - name: avg_days_outstanding
+    expr: ROUND(AVG(days_outstanding), 1)
+    display_name: Avg Days Outstanding
+    synonyms: [average days, average age, DSO]
+    format:
+      type: number
+      decimal_places:
+        type: max
+        places: 1
+
+materialization:
+  schedule: EVERY 1 DAYS
+  mode: relaxed
+  materialized_views:
+    - name: daily_ar_by_provider
+      type: aggregated
+      dimensions: [provider_organization, ar_aging_bucket, fiscal_year]
+      measures: [open_claim_count, gross_ar, net_ar, collection_rate]

@@ -1,0 +1,8 @@
+resources:
+  volumes:
+    rc_recon_vol_bronze:
+      catalog_name: ${resources.schemas.rc_recon.catalog_name}
+      schema_name: ${resources.schemas.rc_recon.name}
+      name: bronze_landing
+      volume_type: MANAGED
+      comment: "Raw FHIR/EDI/CCD file landing zone for RC Recon pipeline"

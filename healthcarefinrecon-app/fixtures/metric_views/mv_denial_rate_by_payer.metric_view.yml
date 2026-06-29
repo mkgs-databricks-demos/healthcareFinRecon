@@ -1,0 +1,86 @@
+version: 1.1
+
+source: "{catalog}.{schema}.gold_rc_recon_exception"
+
+comment: "Claim denial rates by payer — identifies payers with high denial patterns"
+
+dimensions:
+  - name: payer_name
+    expr: payer_name
+    display_name: Payer Name
+    synonyms: [insurance, payer, insurer]
+
+  - name: denial_reason_code
+    expr: denial_reason_code
+    display_name: Denial Reason Code
+    synonyms: [reason code, remark code, CARC]
+
+  - name: denial_reason_desc
+    expr: denial_reason_desc
+    display_name: Denial Reason
+    synonyms: [denial reason, reason for denial]
+
+  - name: claim_type
+    expr: claim_type
+    display_name: Claim Type
+    synonyms: [type of claim, claim category]
+
+  - name: fiscal_year
+    expr: fiscal_year
+    display_name: Fiscal Year
+    synonyms: [FY, year]
+
+  - name: fiscal_period
+    expr: fiscal_period
+    display_name: Fiscal Period
+    synonyms: [period, month, accounting period]
+
+measures:
+  - name: denied_claim_count
+    expr: COUNT(DISTINCT CASE WHEN adjudication_status = 'denied' THEN claim_id END)
+    display_name: Denied Claims
+    synonyms: [denials, denied count, number of denials]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: total_claim_count
+    expr: COUNT(DISTINCT claim_id)
+    display_name: Total Claims
+    synonyms: [claims, total, count]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: denial_rate
+    expr: ROUND(MEASURE(denied_claim_count) / NULLIF(MEASURE(total_claim_count), 0) * 100, 2)
+    display_name: Denial Rate (%)
+    synonyms: [denial percentage, rate of denial, percent denied]
+    format:
+      type: number
+      decimal_places:
+        type: max
+        places: 2
+
+  - name: total_denied_amount
+    expr: SUM(denied_amount)
+    display_name: Total Denied Amount
+    synonyms: [denied dollars, amount denied]
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+materialization:
+  schedule: EVERY 1 DAYS
+  mode: relaxed
+  materialized_views:
+    - name: daily_denial_by_payer
+      type: aggregated
+      dimensions: [payer_name, fiscal_year, fiscal_period, claim_type]
+      measures: [denied_claim_count, total_claim_count, denial_rate, total_denied_amount]

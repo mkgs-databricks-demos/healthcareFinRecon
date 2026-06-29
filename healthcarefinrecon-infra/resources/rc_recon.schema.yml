@@ -1,0 +1,6 @@
+resources:
+  schemas:
+    rc_recon:
+      catalog_name: ${var.catalog}
+      name: ${var.schema}
+      comment: "Healthcare Revenue Cycle Reconciliation — managed by DABs"
