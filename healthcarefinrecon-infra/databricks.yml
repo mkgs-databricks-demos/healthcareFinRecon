@@ -2,7 +2,7 @@ bundle:
   name: healthcarefinrecon-infra
 
 workspace:
-  host: https://fevm-hls-fde.azuredatabricks.net
+  host: https://fevm-hls-fde.cloud.databricks.com
 
 variables:
   catalog:
